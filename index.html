@@ -128,17 +128,21 @@
             <!-- B. 參數設定 -->
             <div id="settings-area" class="mt-4 p-4 border rounded-lg bg-gray-50 hidden">
                 
-                <!-- 快速範本選擇 -->
-                <div class="mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-                    <label class="block text-sm font-bold text-gray-800 mb-2">🚀 快速範本：</label>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="CropTool.applyTemplate(1, 2)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">1×2 上下</button>
-                        <button onclick="CropTool.applyTemplate(2, 1)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">2×1 左右</button>
-                        <button onclick="CropTool.applyTemplate(2, 2)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">2×2 四宮格</button>
-                        <button onclick="CropTool.applyTemplate(3, 3)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">3×3 九宮格</button>
-                        <button onclick="CropTool.applyTemplate(4, 4)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">4×4 十六宮格</button>
-                    </div>
-                </div>
+				<!-- 快速範本選擇 -->
+				<div class="mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+					<label class="block text-sm font-bold text-gray-800 mb-2">🚀 快速範本：</label>
+					<div class="flex flex-wrap gap-2">
+						<button onclick="CropTool.applyTemplate(1, 2)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">1×2 上下</button>
+						<button onclick="CropTool.applyTemplate(2, 1)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">2×1 左右</button>
+						<button onclick="CropTool.applyTemplate(2, 2)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">2×2 四宮格</button>
+						<button onclick="CropTool.applyTemplate(3, 3)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">3×3 九宮格</button>
+						<button onclick="CropTool.applyTemplate(3, 4)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">3×4 十二宮格</button>
+						<button onclick="CropTool.applyTemplate(4, 3)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">4×3 十二宮格</button>
+						<button onclick="CropTool.applyTemplate(4, 4)" class="px-3 py-1.5 bg-white hover:bg-purple-100 text-purple-700 font-medium rounded-lg shadow-sm transition">4×4 十六宮格</button>
+					</div>
+				</div>
+
+
 
                 <!-- 剪裁模式切換 -->
                 <label class="block text-sm font-medium text-gray-700 mb-2">剪裁模式:</label>
@@ -158,7 +162,7 @@
                     <label for="cropCount" class="block text-sm font-medium text-gray-700 mb-1">
                         輸入期望的剪裁結果總張數 (N)：
                     </label>
-                    <input type="number" id="cropCount" value="4" min="1" max="100" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="例如：4">
+                    <input type="number" id="cropCount" value="9" min="1" max="100" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="例如：4">
                 </div>
 
                 <!-- 自訂模式輸入 -->
@@ -275,7 +279,7 @@
     <!-- 版權宣告 -->
     <footer class="bg-white/90 py-4 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
-            @Randy
+            @ by Randy 2025/12/2
         </div>
     </footer>
 
@@ -303,8 +307,16 @@
             DOT_SIZE: 8,
             
             // 支援的檔案格式
-            VALID_FILE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp']
-        };
+            VALID_FILE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'],
+			
+			// ✨ 新增：自動偵測設定
+			AUTO_DETECT: {
+				DEFAULT_CROP_COUNT: 9,           // 預設 9 張
+				EDGE_THRESHOLD: 40,               // 邊緣檢測閾值
+				MIN_LINE_STRENGTH: 0.6,           // 最小線條強度（60%）
+				SAMPLE_DENSITY: 2                 // 取樣密度（每 N 個像素取樣一次）			
+				}
+		};
 
         // =========================================================
         // 主要應用程式物件
@@ -322,12 +334,13 @@
                     horizontal: [] 
                 },
                 draggingLine: null, 
-                grid: { rows: 2, cols: 2 },
-                cropCount: 4,
+                grid: { rows: 3, cols: 3 },
+                cropCount: 9,
                 removeBackground: false,
                 bgTargetColor: CONFIG.DEFAULT_BG_COLOR,
                 bgTolerance: CONFIG.DEFAULT_TOLERANCE,
-                mode: 'auto'
+                mode: 'auto',
+				autoDetectResult: null
             },
             
             // 歷史記錄
@@ -562,35 +575,49 @@
                 
                 reader.onload = (event) => {
                     const img = new Image();
-                    img.onload = () => {
-                        this.state.image = img;
-                        this.state.imgRatio = img.width / img.height;
-                        
-                        setTimeout(() => {
-                            this.elements.uploadStatus.textContent = '圖片解碼完成，正在繪製中...';
-                            this.elements.progressBar.style.width = '90%';
-                            
-                            const containerWidth = document.getElementById('canvas-container').clientWidth || 600;
-                            const canvasWidth = containerWidth;
-                            const canvasHeight = canvasWidth / this.state.imgRatio;
-                            
-                            this.elements.canvas.width = img.width;
-                            this.elements.canvas.height = img.height;
-                            this.elements.canvas.style.width = `${canvasWidth}px`;
-                            this.elements.canvas.style.height = `${canvasHeight}px`;
-                            
-                            this.history.clear();
-                            this.updateGrid();
-                            this.playSound('A4');
-                            
-                            this.elements.uploadStatus.textContent = '完成！';
-                            this.elements.progressBar.style.width = '100%';
-                            setTimeout(() => {
-                                this.elements.uploadProgressContainer.classList.add('hidden');
-                                this.elements.progressBar.style.width = '0%';
-                            }, 500);
-                        }, 0);
-                    };
+					img.onload = () => {
+						this.state.image = img;
+						this.state.imgRatio = img.width / img.height;
+						
+						setTimeout(() => {
+							this.elements.uploadStatus.textContent = '圖片解碼完成，正在分析中...';
+							this.elements.progressBar.style.width = '85%';
+							
+							// ✅ 執行自動偵測
+							const detected = this.autoDetectGrid();
+							this.state.autoDetectResult = detected;
+							
+							// ✅ 套用偵測結果
+							if (detected) {
+								this.applyDetectionResult(detected);
+							}
+							
+							const containerWidth = document.getElementById('canvas-container').clientWidth || 600;
+							const canvasWidth = containerWidth;
+							const canvasHeight = canvasWidth / this.state.imgRatio;
+							
+							this.elements.canvas.width = img.width;
+							this.elements.canvas.height = img.height;
+							this.elements.canvas.style.width = `${canvasWidth}px`;
+							this.elements.canvas.style.height = `${canvasHeight}px`;
+							
+							this.history.clear();
+							this.updateGrid();
+							this.playSound('A4');
+							
+							// ✅ 顯示偵測結果訊息
+							this.showDetectionMessage(detected);
+							
+							this.elements.uploadStatus.textContent = '完成！';
+							this.elements.progressBar.style.width = '100%';
+							setTimeout(() => {
+								this.elements.uploadProgressContainer.classList.add('hidden');
+								this.elements.progressBar.style.width = '0%';
+							}, 500);
+						}, 0);
+					};
+
+
                     
                     img.onerror = () => {
                         this.showMessage("圖片解碼失敗，請確認檔案格式是否正確。", 'bg-red-100 text-red-700');
@@ -670,6 +697,269 @@
                 
                 return { rows: bestR, cols: bestC };
             },
+
+			// =========================================================
+			// 自動偵測格線
+			// =========================================================
+			autoDetectGrid() {
+				if (!this.state.image) return null;
+				
+				const img = this.state.image;
+				const ratio = img.width / img.height;
+				
+				// 建立臨時 canvas 進行分析
+				const tempCanvas = document.createElement('canvas');
+				const tempCtx = tempCanvas.getContext('2d');
+				
+				// 縮小圖片以加快分析速度
+				const maxAnalysisSize = 800;
+				let analysisWidth = img.width;
+				let analysisHeight = img.height;
+				
+				if (img.width > maxAnalysisSize || img.height > maxAnalysisSize) {
+					if (img.width > img.height) {
+						analysisWidth = maxAnalysisSize;
+						analysisHeight = Math.round(maxAnalysisSize / ratio);
+					} else {
+						analysisHeight = maxAnalysisSize;
+						analysisWidth = Math.round(maxAnalysisSize * ratio);
+					}
+				}
+				
+				tempCanvas.width = analysisWidth;
+				tempCanvas.height = analysisHeight;
+				tempCtx.drawImage(img, 0, 0, analysisWidth, analysisHeight);
+				
+				// 方法 1: 邊緣檢測
+				const detectedLines = this.detectSeparatorLines(tempCanvas, tempCtx);
+				
+				// 方法 3: 長寬比分析
+				const ratioSuggestion = this.analyzeAspectRatio(ratio);
+				
+				// 綜合判斷
+				let result = {
+					method: '',
+					rows: 3,
+					cols: 3,
+					confidence: 0,
+					lines: { vertical: [], horizontal: [] }
+				};
+				
+				// 如果偵測到明顯的分隔線
+				if (detectedLines.confidence > 0.5) {
+					result = {
+						method: 'edge-detection',
+						rows: detectedLines.horizontal.length + 1,
+						cols: detectedLines.vertical.length + 1,
+						confidence: detectedLines.confidence,
+						lines: {
+							vertical: detectedLines.vertical,
+							horizontal: detectedLines.horizontal
+						}
+					};
+				} 
+				// 如果長寬比極端
+				else if (ratioSuggestion.confidence > 0.7) {
+					result = {
+						method: 'aspect-ratio',
+						rows: ratioSuggestion.rows,
+						cols: ratioSuggestion.cols,
+						confidence: ratioSuggestion.confidence,
+						lines: { vertical: [], horizontal: [] }
+					};
+				}
+				// 使用預設值
+				else {
+					const optimal = this.calculateOptimalGrid(CONFIG.AUTO_DETECT.DEFAULT_CROP_COUNT);
+					result = {
+						method: 'default',
+						rows: optimal.rows,
+						cols: optimal.cols,
+						confidence: 0.3,
+						lines: { vertical: [], horizontal: [] }
+					};
+				}
+				
+				return result;
+			},
+
+			// 偵測分隔線
+			detectSeparatorLines(canvas, ctx) {
+				const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				const data = imageData.data;
+				const width = canvas.width;
+				const height = canvas.height;
+				
+				const threshold = CONFIG.AUTO_DETECT.EDGE_THRESHOLD;
+				const density = CONFIG.AUTO_DETECT.SAMPLE_DENSITY;
+				
+				// 計算每一列的邊緣強度（檢測水平線）
+				const horizontalStrength = [];
+				for (let y = 0; y < height; y += density) {
+					let edgeCount = 0;
+					let totalSamples = 0;
+					
+					for (let x = 1; x < width - 1; x += density) {
+						const idx = (y * width + x) * 4;
+						const prevIdx = (y * width + (x - 1)) * 4;
+						
+						// 計算灰階值
+						const gray = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
+						const prevGray = (data[prevIdx] + data[prevIdx + 1] + data[prevIdx + 2]) / 3;
+						
+						// 檢測邊緣
+						if (Math.abs(gray - prevGray) > threshold) {
+							edgeCount++;
+						}
+						totalSamples++;
+					}
+					
+					horizontalStrength.push(edgeCount / totalSamples);
+				}
+				
+				// 計算每一行的邊緣強度（檢測垂直線）
+				const verticalStrength = [];
+				for (let x = 0; x < width; x += density) {
+					let edgeCount = 0;
+					let totalSamples = 0;
+					
+					for (let y = 1; y < height - 1; y += density) {
+						const idx = (y * width + x) * 4;
+						const prevIdx = ((y - 1) * width + x) * 4;
+						
+						const gray = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
+						const prevGray = (data[prevIdx] + data[prevIdx + 1] + data[prevIdx + 2]) / 3;
+						
+						if (Math.abs(gray - prevGray) > threshold) {
+							edgeCount++;
+						}
+						totalSamples++;
+					}
+					
+					verticalStrength.push(edgeCount / totalSamples);
+				}
+				
+				// 找出強度峰值（可能的分隔線）
+				const minStrength = CONFIG.AUTO_DETECT.MIN_LINE_STRENGTH;
+				const horizontalLines = this.findPeaks(horizontalStrength, minStrength, density)
+					.map(y => y / height);
+				const verticalLines = this.findPeaks(verticalStrength, minStrength, density)
+					.map(x => x / width);
+				
+				// 計算信心度
+				const avgHStrength = horizontalStrength.reduce((a, b) => a + b, 0) / horizontalStrength.length;
+				const avgVStrength = verticalStrength.reduce((a, b) => a + b, 0) / verticalStrength.length;
+				const confidence = Math.min(1, (avgHStrength + avgVStrength) / 2 + 0.3);
+				
+				return {
+					horizontal: horizontalLines,
+					vertical: verticalLines,
+					confidence: horizontalLines.length > 0 || verticalLines.length > 0 ? confidence : 0
+				};
+			},
+
+			// 找出峰值
+			findPeaks(data, minStrength, density) {
+				const peaks = [];
+				const windowSize = Math.floor(20 / density); // 20px 窗口
+				
+				for (let i = windowSize; i < data.length - windowSize; i++) {
+					if (data[i] < minStrength) continue;
+					
+					let isPeak = true;
+					for (let j = i - windowSize; j <= i + windowSize; j++) {
+						if (j !== i && data[j] >= data[i]) {
+							isPeak = false;
+							break;
+						}
+					}
+					
+					if (isPeak) {
+						peaks.push(i * density);
+						i += windowSize; // 跳過附近區域
+					}
+				}
+				
+				return peaks;
+			},
+
+			// 長寬比分析
+			analyzeAspectRatio(ratio) {
+				let rows = 3, cols = 3, confidence = 0.3;
+				
+				if (ratio > 3) {
+					// 極寬圖片（如全景圖）
+					cols = Math.min(Math.ceil(ratio), 6);
+					rows = 1;
+					confidence = Math.min(0.9, 0.5 + ratio / 10);
+				} else if (ratio > 2) {
+					// 寬圖片
+					cols = 3;
+					rows = 1;
+					confidence = 0.7;
+				} else if (ratio < 0.33) {
+					// 極長圖片（如長條漫畫）
+					rows = Math.min(Math.ceil(1 / ratio), 6);
+					cols = 1;
+					confidence = Math.min(0.9, 0.5 + (1/ratio) / 10);
+				} else if (ratio < 0.5) {
+					// 長圖片
+					rows = 3;
+					cols = 1;
+					confidence = 0.7;
+				} else {
+					// 接近正方形，使用預設
+					const optimal = this.calculateOptimalGrid(CONFIG.AUTO_DETECT.DEFAULT_CROP_COUNT);
+					rows = optimal.rows;
+					cols = optimal.cols;
+					confidence = 0.5;
+				}
+				
+				return { rows, cols, confidence };
+			},
+
+			applyDetectionResult(detected) {
+				if (!detected) return;
+				
+				// 切換到自訂模式
+				if (detected.rows !== 0 && detected.cols !== 0) {
+					document.getElementById('modeCustom').checked = true;
+					this.switchMode('custom');
+					this.elements.rowsInput.value = detected.rows;
+					this.elements.colsInput.value = detected.cols;
+					this.state.grid.rows = detected.rows;
+					this.state.grid.cols = detected.cols;
+				}
+				
+				// 如果有偵測到精確的格線位置，直接套用
+				if (detected.lines.vertical.length > 0 || detected.lines.horizontal.length > 0) {
+					this.state.lines.vertical = [...detected.lines.vertical];
+					this.state.lines.horizontal = [...detected.lines.horizontal];
+				}
+			},
+
+			showDetectionMessage(detected) {
+				if (!detected) return;
+				
+				const methodName = {
+					'edge-detection': '邊緣偵測',
+					'aspect-ratio': '長寬比分析',
+					'default': '智慧優化'
+				};
+				
+				const confidencePercent = Math.round(detected.confidence * 100);
+				const emoji = detected.confidence > 0.7 ? '✨' : detected.confidence > 0.5 ? '💡' : '🤖';
+				
+				const message = `${emoji} 自動偵測：建議使用 ${detected.rows}×${detected.cols} 分割 (${methodName[detected.method]}，信心度 ${confidencePercent}%)`;
+				
+				const className = detected.confidence > 0.7 
+					? 'bg-green-100 text-green-700' 
+					: 'bg-blue-100 text-blue-700';
+				
+				this.showMessage(message, className);
+			},
+
+
             
             updateGrid() {
                 if (!this.state.image) return;

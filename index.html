@@ -577,17 +577,35 @@
 			},
 
             
-            initAudio() {
-                document.addEventListener('click', () => {
-                    if (!this.synth) {
-                        try {
-                            this.synth = new Tone.Synth().toDestination();
-                        } catch (error) {
-                            console.error("Tone.js 初始化失敗:", error);
-                        }
-                    }
-                }, { once: true });
-            },
+			initAudio() {
+			    document.addEventListener('click', () => {
+			        if (!this.synth) {
+			            try {
+			                // ✨ 使用 MembraneSynth（鼓聲效果，更有質感）
+			                this.synth = new Tone.MembraneSynth({
+			                    pitchDecay: 0.05,
+			                    octaves: 4,
+			                    oscillator: {
+			                        type: "sine"
+			                    },
+			                    envelope: {
+			                        attack: 0.001,
+			                        decay: 0.4,
+			                        sustain: 0.01,
+			                        release: 1.4,
+			                        attackCurve: "exponential"
+			                    }
+			                }).toDestination();
+			                
+			                // 降低音量（-20dB = 約 10% 音量）
+			                this.synth.volume.value = -20;
+			                
+			            } catch (error) {
+			                console.error("Tone.js 初始化失敗:", error);
+			            }
+			        }
+			    }, { once: true });
+			},
             
             // =========================================================
             // 音效播放
@@ -1709,5 +1727,6 @@
     </script>
 </body>
 </html>
+
 
 

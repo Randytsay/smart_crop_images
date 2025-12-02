@@ -170,13 +170,13 @@
                     <div class="flex space-x-4">
                         <div class="flex-1">
                             <label for="rowsInput" class="block text-sm font-medium text-gray-700 mb-1">
-                                列數 (R)：
+                                列數 (高 R)：
                             </label>
                             <input type="number" id="rowsInput" value="2" min="1" max="20" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div class="flex-1">
                             <label for="colsInput" class="block text-sm font-medium text-gray-700 mb-1">
-                                行數 (C)：
+                                行數 (寬 C)：
                             </label>
                             <input type="number" id="colsInput" value="2" min="1" max="20" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         </div>
@@ -279,7 +279,7 @@
     <!-- 版權宣告 -->
     <footer class="bg-white/90 py-4 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
-            @ by Randy 2025/12/2
+            Made with ❤️ by Randy © 2025
         </div>
     </footer>
 
@@ -436,68 +436,122 @@
                 this.elements.previewCtx = this.elements.previewCanvas.getContext('2d');
             },
             
-            bindEvents() {
-                // 圖片上傳
-                this.elements.imageUpload.addEventListener('change', (e) => this.handleImageUpload(e));
-                
-                // 拖放上傳
-                this.elements.uploadLabel.addEventListener('dragover', (e) => this.handleDragOver(e));
-                this.elements.uploadLabel.addEventListener('dragleave', () => this.handleDragLeave());
-                this.elements.uploadLabel.addEventListener('drop', (e) => this.handleDrop(e));
-                
-                // 參數變更
-                this.elements.cropCountInput.addEventListener('input', () => {
-                    if (this.state.mode === 'auto') this.updateGrid();
-                });
-                this.elements.rowsInput.addEventListener('input', () => this.updateGrid());
-                this.elements.colsInput.addEventListener('input', () => this.updateGrid());
-                
-                // 去背選項
-                this.elements.removeBackgroundCheckbox.addEventListener('change', () => this.toggleBackgroundRemoval());
-                this.elements.targetColorInput.addEventListener('input', (e) => {
-                    this.state.bgTargetColor = e.target.value;
-                });
-                this.elements.toleranceInput.addEventListener('input', (e) => {
-                    this.state.bgTolerance = parseInt(e.target.value);
-                    this.elements.toleranceValue.textContent = `${this.state.bgTolerance}%`;
-                });
-                
-                // Canvas 互動
-                this.elements.canvas.addEventListener('mousedown', (e) => this.handleStart(e.clientX, e.clientY));
-                document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-                document.addEventListener('mouseup', () => this.handleEnd());
-                
-                this.elements.canvas.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    this.handleStart(touch.clientX, touch.clientY);
-                });
-                this.elements.canvas.addEventListener('touchmove', (e) => {
-                    if (this.state.draggingLine) {
-                        const touch = e.touches[0];
-                        this.handleMove(touch.clientX, touch.clientY);
-                    }
-                });
-                this.elements.canvas.addEventListener('touchend', () => this.handleEnd());
-                
-                // 剪裁按鈕
-                this.elements.cropButton.addEventListener('click', () => this.executeCrop());
-                
-                // 歷史記錄按鈕
-                this.elements.undoBtn.addEventListener('click', () => this.undo());
-                this.elements.redoBtn.addEventListener('click', () => this.redo());
-                this.elements.resetBtn.addEventListener('click', () => this.resetGrid());
-                
-                // 設定儲存/載入
-                this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
-                this.elements.loadSettingsBtn.addEventListener('click', () => this.loadSettings());
-                
-                // 鍵盤快捷鍵
-                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
-                
-                // 視窗大小調整
-                window.addEventListener('resize', () => this.handleResize());
-            },
+			bindEvents() {
+			    // 圖片上傳
+			    this.elements.imageUpload.addEventListener('change', (e) => this.handleImageUpload(e));
+			    
+			    // 拖放上傳
+			    this.elements.uploadLabel.addEventListener('dragover', (e) => this.handleDragOver(e));
+			    this.elements.uploadLabel.addEventListener('dragleave', () => this.handleDragLeave());
+			    this.elements.uploadLabel.addEventListener('drop', (e) => this.handleDrop(e));
+			    
+			    // ========== 參數變更 - cropCount (總張數) ==========
+			    // 點擊時全選
+			    this.elements.cropCountInput.addEventListener('focus', (e) => {
+			        e.target.select();
+			    });
+			    
+			    // 輸入時處理（允許暫時為空）
+			    this.elements.cropCountInput.addEventListener('input', (e) => {
+			        if (e.target.value === '') return; // 允許暫時清空
+			        if (this.state.mode === 'auto') this.updateGrid();
+			    });
+			    
+			    // 失焦時檢查最小值
+			    this.elements.cropCountInput.addEventListener('blur', (e) => {
+			        if (e.target.value === '' || parseInt(e.target.value) < 1) {
+			            e.target.value = 1;
+			            if (this.state.mode === 'auto') this.updateGrid();
+			        }
+			    });
+			    
+			    // ========== 參數變更 - rowsInput (列數) ==========
+			    // 點擊時全選
+			    this.elements.rowsInput.addEventListener('focus', (e) => {
+			        e.target.select();
+			    });
+			    
+			    // 輸入時處理（允許暫時為空）
+			    this.elements.rowsInput.addEventListener('input', (e) => {
+			        if (e.target.value === '') return; // 允許暫時清空
+			        this.updateGrid();
+			    });
+			    
+			    // 失焦時檢查最小值
+			    this.elements.rowsInput.addEventListener('blur', (e) => {
+			        if (e.target.value === '' || parseInt(e.target.value) < 1) {
+			            e.target.value = 1;
+			            this.updateGrid();
+			        }
+			    });
+			    
+			    // ========== 參數變更 - colsInput (行數) ==========
+			    // 點擊時全選
+			    this.elements.colsInput.addEventListener('focus', (e) => {
+			        e.target.select();
+			    });
+			    
+			    // 輸入時處理（允許暫時為空）
+			    this.elements.colsInput.addEventListener('input', (e) => {
+			        if (e.target.value === '') return; // 允許暫時清空
+			        this.updateGrid();
+			    });
+			    
+			    // 失焦時檢查最小值
+			    this.elements.colsInput.addEventListener('blur', (e) => {
+			        if (e.target.value === '' || parseInt(e.target.value) < 1) {
+			            e.target.value = 1;
+			            this.updateGrid();
+			        }
+			    });
+			    
+			    // 去背選項
+			    this.elements.removeBackgroundCheckbox.addEventListener('change', () => this.toggleBackgroundRemoval());
+			    this.elements.targetColorInput.addEventListener('input', (e) => {
+			        this.state.bgTargetColor = e.target.value;
+			    });
+			    this.elements.toleranceInput.addEventListener('input', (e) => {
+			        this.state.bgTolerance = parseInt(e.target.value);
+			        this.elements.toleranceValue.textContent = `${this.state.bgTolerance}%`;
+			    });
+			    
+			    // Canvas 互動
+			    this.elements.canvas.addEventListener('mousedown', (e) => this.handleStart(e.clientX, e.clientY));
+			    document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+			    document.addEventListener('mouseup', () => this.handleEnd());
+			    
+			    this.elements.canvas.addEventListener('touchstart', (e) => {
+			        e.preventDefault();
+			        const touch = e.touches[0];
+			        this.handleStart(touch.clientX, touch.clientY);
+			    });
+			    this.elements.canvas.addEventListener('touchmove', (e) => {
+			        if (this.state.draggingLine) {
+			            const touch = e.touches[0];
+			            this.handleMove(touch.clientX, touch.clientY);
+			        }
+			    });
+			    this.elements.canvas.addEventListener('touchend', () => this.handleEnd());
+			    
+			    // 剪裁按鈕
+			    this.elements.cropButton.addEventListener('click', () => this.executeCrop());
+			    
+			    // 歷史記錄按鈕
+			    this.elements.undoBtn.addEventListener('click', () => this.undo());
+			    this.elements.redoBtn.addEventListener('click', () => this.redo());
+			    this.elements.resetBtn.addEventListener('click', () => this.resetGrid());
+			    
+			    // 設定儲存/載入
+			    this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+			    this.elements.loadSettingsBtn.addEventListener('click', () => this.loadSettings());
+			    
+			    // 鍵盤快捷鍵
+			    document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+			    
+			    // 視窗大小調整
+			    window.addEventListener('resize', () => this.handleResize());
+			},
+
             
             initAudio() {
                 document.addEventListener('click', () => {
@@ -1631,3 +1685,4 @@
     </script>
 </body>
 </html>
+
